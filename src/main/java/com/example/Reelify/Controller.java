@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.io.IOException;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/videos")
 public class Controller {
