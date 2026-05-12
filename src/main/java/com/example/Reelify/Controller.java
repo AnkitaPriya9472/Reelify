@@ -13,8 +13,8 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -52,6 +52,27 @@ public class Controller {
                 .body(object.asByteArray());
     }
 
+    //to show all videos in the card
+    @GetMapping("/stream/allvideos")
+    public ResponseEntity<List<VideoMetadata>> showAllVideos(){
+        return ResponseEntity.ok(videoService.getAllVideos());
+    }
+
+    @GetMapping("/stream/{videoId}/playlist")
+    public ResponseEntity<String> playCardVideos(@PathVariable String videoId){
+        return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"))
+                        .body(videoService.getMinioSegments(videoId));
+    }
+
+    @GetMapping("/stream/{videoId}/{segmentName}")
+    public ResponseEntity<byte[]> streamSegment(@PathVariable String videoId,
+                                                @PathVariable String segmentName) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("video/MP2T"))
+                .body(videoService.getSegments(videoId, segmentName));
+    }
+
+    //old hardcoded playlist
     @GetMapping("/stream/playlist")
     public ResponseEntity<String> playlist() {
         String m3u8 = "#EXTM3U\n" +
@@ -73,5 +94,4 @@ public class Controller {
         // acting as a manifest that tells a media player where to find video segments and what order to play them in.
         // It is the foundation of HTTP Live Streaming (HLS)
     }
-
 }

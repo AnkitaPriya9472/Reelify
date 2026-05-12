@@ -4,17 +4,26 @@ import com.example.Reelify.model.VideoMetadata;
 import com.example.Reelify.repository.VideoMetadataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class VideoService {
@@ -94,5 +103,35 @@ public class VideoService {
         if (filename == null) return ".mp4";
         int dot = filename.lastIndexOf('.');
         return dot >= 0 ? filename.substring(dot) : ".mp4";
+    }
+    public List<VideoMetadata> getAllVideos(){
+        return videoMetadataRepository.findAll();
+    }
+
+    public String getMinioSegments(String videoId){
+        List<String> key = s3Client.listObjectsV2(r -> r.bucket(bucket).prefix(videoId+"/")).contents()
+                .stream().map(s -> s.key()).collect(Collectors.toList());
+
+        List<String> segments =new ArrayList<>();
+        for(String k : key){
+           String segment = k.substring(k.lastIndexOf("/") + 1);
+            segments.add(segment);
+        }
+        StringBuilder m3u8 = new StringBuilder();
+        m3u8.append("#EXTM3U\n");
+        m3u8.append("#EXT-X-VERSION:3\n");
+        m3u8.append("#EXT-X-TARGETDURATION:10\n");
+        m3u8.append("#EXT-X-MEDIA-SEQUENCE:0\n");
+        for (String segment : segments) {
+            m3u8.append("#EXTINF:10.0,\n");
+            m3u8.append(segment).append("\n");
+        }
+        m3u8.append("#EXT-X-ENDLIST");
+        return m3u8.toString();
+    }
+
+     public byte[] getSegments(String videoId, String segmentName){
+        String key = videoId + "/" + segmentName;
+        return s3Client.getObjectAsBytes(r -> r.bucket(bucket).key(key)).asByteArray();
     }
 }
