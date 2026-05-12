@@ -1,3 +1,21 @@
+Steps:
+1.  mvn clean+install
+2. docker start reelify-cassandra
+2. docker ps
+3. Run application
+4. 
+
+
+
+
+
+
+
+
+
+
+
+
 ```
 │
 POST /videos/upload

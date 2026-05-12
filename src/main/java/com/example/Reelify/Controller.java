@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 
 import org.springframework.beans.factory.annotation.Value;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -31,8 +32,8 @@ public class Controller {
 
     @PostMapping("/upload")
     public ResponseEntity<VideoMetadata> upload(@RequestPart("video") MultipartFile file,
-                                                @RequestPart("title") String title) throws IOException {
-        return ResponseEntity.ok(videoService.uploadVideo(file,title));
+                                                @RequestPart("title") String title) throws IOException, InterruptedException {
+        return ResponseEntity.ok(videoService.uploadVideo(file, title));
     }
 
     @GetMapping("/metadata/{id}")
@@ -50,4 +51,27 @@ public class Controller {
                 .contentType(MediaType.parseMediaType("video/mp4"))
                 .body(object.asByteArray());
     }
+
+    @GetMapping("/stream/playlist")
+    public ResponseEntity<String> playlist() {
+        String m3u8 = "#EXTM3U\n" +
+                "#EXT-X-VERSION:3\n" +
+                "#EXT-X-TARGETDURATION:10\n" +
+                "#EXT-X-MEDIA-SEQUENCE:0\n" +
+                "#EXTINF:10.0,\n" + "http://localhost:8080/videos/stream/output_000.ts\n" +
+                "#EXTINF:10.0,\n" + "http://localhost:8080/videos/stream/output_001.ts\n" +
+                "#EXTINF:10.0,\n" + "http://localhost:8080/videos/stream/output_002.ts\n" +
+                "#EXTINF:10.0,\n" + "http://localhost:8080/videos/stream/output_003.ts\n" +
+                "#EXTINF:10.0,\n" + "http://localhost:8080/videos/stream/output_004.ts\n" +
+                "#EXT-X-ENDLIST";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"))
+                .body(m3u8);
+
+        //a UTF-8 encoded playlist file used by websites to stream audio and video,
+        // acting as a manifest that tells a media player where to find video segments and what order to play them in.
+        // It is the foundation of HTTP Live Streaming (HLS)
+    }
+
 }
