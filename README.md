@@ -3,17 +3,23 @@ Steps:
 2. docker start reelify-cassandra
 2. docker ps
 3. Run application
-4. 
+
+┌─────────────┐         ┌──────────────────────────┐          ┌─────────────┐
+│             │  upload │                          │ segments │             │
+│   Angular   │────────▶│      Spring Boot         │─────────▶│    MinIO    │
+│  Reelify UI │         │        Reelify           │          │  (Storage)  │
+│             │◀────────│                          │◀─────────│             │
+│             │  stream │                          │  bytes   │             │
+└─────────────┘         └──────────┬───────────────┘          └─────────────┘
+                      metadata     │
+                                   ▼
+                            ┌─────────────────┐
+                            │    Cassandra    │
+                            │ (videoId+title) │
+                            └─────────────────┘
 
 
-
-
-
-
-
-
-
-
+![img.png](img.png)
 
 
 ```
