@@ -4,23 +4,10 @@ Steps:
 2. docker ps
 3. Run application
 
-┌─────────────┐         ┌──────────────────────────┐          ┌─────────────┐
-│             │  upload │                          │ segments │             │
-│   Angular   │────────▶│      Spring Boot         │─────────▶│    MinIO    │
-│  Reelify UI │         │        Reelify           │          │  (Storage)  │
-│             │◀────────│                          │◀─────────│             │
-│             │  stream │                          │  bytes   │             │
-└─────────────┘         └──────────┬───────────────┘          └─────────────┘
-                      metadata     │
-                                   ▼
-                            ┌─────────────────┐
-                            │    Cassandra    │
-                            │ (videoId+title) │
-                            └─────────────────┘
-
-
 ![img.png](img.png)
 
+tbd
+![img_1.png](img_1.png)
 
 ```
 │
@@ -56,8 +43,3 @@ create
 CREATE KEYSPACE reelify
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 ```
-
-
-
-
-
