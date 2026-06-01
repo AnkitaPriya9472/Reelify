@@ -65,7 +65,65 @@ CREATE KEYSPACE reelify
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 ```
 
-Angular → GET /presigned-url → Reelify → MinIO generates URL → returns to Angular
-Angular → PUT video directly to MinIO (bypasses your backend entirely)
-MinIO → fires event to Kafka topic "video-uploaded"
-Ingestion Service → consumes event → transcodes → uploads segments → updates Cassandra
+# Reelify — Architecture & Flow
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         CLIENT LAYER                                │
+│                                                                     │
+│                    ┌─────────────────┐                              │
+│                    │   Angular UI    │                              │
+│                    │  localhost:4200 │                              │
+│                    └────────┬────────┘                              │
+└─────────────────────────────┼───────────────────────────────────────┘
+                              │ All API calls
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                         GATEWAY LAYER                               │
+│                                                                     │
+│         ┌──────────────────────────────────────┐                   │
+│         │         Kong API Gateway             │                   │
+│         │           port: 9000                 │                   │
+│         │                                      │                   │
+│         │  ✓ JWT validation (RS256)            │                   │
+│         │  ✓ Rate limiting (100 req/min)       │                   │
+│         │  ✓ CORS                              │                   │
+│         │  ✓ Routing                           │                   │
+│         └───────────┬──────────────────────────┘                   │
+│                     │              │                                │
+│              /videos│         /auth│                                │
+│                     │              ▼                                │
+│                     │    ┌──────────────────┐                       │
+│                     │    │    Keycloak       │                      │
+│                     │    │  port: 8081      │                       │
+│                     │    │                  │                       │
+│                     │    │  realm: reelify  │                       │
+│                     │    │  RS256 JWT       │                       │
+│                     │    └──────────────────┘                       │
+└─────────────────────┼───────────────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                       SERVICE LAYER                                 │
+│                                                                     │
+│              ┌───────────────────────┐                             │
+│              │     Reelify App       │                             │
+│              │      port: 8080       │                             │
+│              │                       │                             │
+│              │  POST /initiate-upload│                             │
+│              │  POST /upload-complete│                             │
+│              │  GET  /metadata       │                             │
+│              │  GET  /stream         │                             │
+│              └──────────┬────────────┘                             │
+│                         │                                          │
+│              ┌──────────▼────────────┐                             │
+│              │       Cassandra       │                             │
+│              │       port: 9042      │                             │
+│              │                       │                             │
+│              │  video_metadata table │                             │
+│              │  PENDING→PROCESSING   │                             │
+│              │  →READY / FAILED      │                             │
+│              └───────────────────────┘                             │
+└─────────────────────────────────────────────────────────────────────┘
+```
