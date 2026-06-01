@@ -24,9 +24,6 @@ Start reelify-ingestion-service — port 8082
 Step 5 — Open Kafka UI
 Go to http://localhost:8090 in your browser. You should see the Kafka cluster with no topics yet — the video.uploaded topic will appear after the first message.
 
-
-![img.png](img.png)
-
 tbd
 ![img_3.png](img_3.png)
 
