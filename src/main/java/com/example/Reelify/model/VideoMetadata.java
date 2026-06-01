@@ -8,27 +8,30 @@ import java.util.UUID;
 
 @Table("video_metadata")
 public class VideoMetadata {
-
     @PrimaryKey
     private UUID videoId;
-
     private String title;
-
+    private String status;           // PENDING, PROCESSING, READY, FAILED
+    private String rawKey;           // e.g. "{videoId}/raw/input.mp4"
+    private String masterPlaylistKey;// e.g. "{videoId}/master.m3u8"
 
     public UUID getVideoId() {
         return videoId;
-    }
-
-    public void setVideoId(UUID videoId) {
-        this.videoId = videoId;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public String getStatus() {
+        return status;
     }
 
+    public String getRawKey() {
+        return rawKey;
+    }
+
+    public String getMasterPlaylistKey() {
+        return masterPlaylistKey;
+    }
 }

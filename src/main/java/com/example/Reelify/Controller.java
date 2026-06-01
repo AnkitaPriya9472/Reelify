@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:4200")
@@ -70,6 +71,19 @@ public class Controller {
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType("video/MP2T"))
                 .body(videoService.getSegments(videoId, segmentName));
+    }
+
+    // ── NEW: Step 1 — Angular requests a pre-signed URL before uploading ──
+    @PostMapping("/initiate-upload")
+    public ResponseEntity<Map<String, String>> initiateUpload(@RequestParam String title) {
+        return ResponseEntity.ok(videoService.initiateUpload(title));
+    }
+
+    // ── NEW: Step 2 — Angular confirms upload is done, triggers ingestion ──
+    @PostMapping("/{videoId}/upload-complete")
+    public ResponseEntity<Void> uploadComplete(@PathVariable String videoId) {
+        videoService.confirmUpload(videoId);
+        return ResponseEntity.ok().build();
     }
 
     //old hardcoded playlist

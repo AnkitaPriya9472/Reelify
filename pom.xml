@@ -49,6 +49,12 @@
 			<artifactId>s3</artifactId>
 		</dependency>
 
+		<!-- Kafka — publish video.uploaded events -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
