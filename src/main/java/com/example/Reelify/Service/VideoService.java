@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
@@ -45,7 +44,7 @@ public class VideoService {
     private S3Presigner s3Presigner;
 
     @Autowired
-    private KafkaTemplate<String, VideoUploadedEvent> kafkaTemplate;
+    private KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${minio.bucket}")
     private String bucket;
@@ -152,21 +151,11 @@ public class VideoService {
         return videoMetadataRepository.findAll();
     }
 
-    public String getMinioSegments(String videoId) {
-        List<String> keys = s3Client.listObjectsV2(r -> r.bucket(bucket).prefix(videoId + "/"))
-                .contents().stream().map(s -> s.key()).collect(Collectors.toList());
-
-        List<String> segments = keys.stream()
-                .map(k -> k.substring(k.lastIndexOf("/") + 1))
-                .collect(Collectors.toList());
-
-        StringBuilder m3u8 = new StringBuilder();
-        m3u8.append("#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:10\n#EXT-X-MEDIA-SEQUENCE:0\n");
-        for (String segment : segments) {
-            m3u8.append("#EXTINF:10.0,\n").append(segment).append("\n");
-        }
-        m3u8.append("#EXT-X-ENDLIST");
-        return m3u8.toString();
+    public byte[] getMasterPlaylist(String videoId) {
+        String masterKey = videoId + "/master.m3u8";
+        return s3Client.getObjectAsBytes(
+                r -> r.bucket(bucket).key(masterKey)
+        ).asByteArray();
     }
 
     public byte[] getSegments(String videoId, String segmentName) {

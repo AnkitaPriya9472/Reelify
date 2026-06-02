@@ -1,7 +1,7 @@
 Steps:
 1.  mvn clean+install
 2. docker start reelify-cassandra
-2. docker ps
+2. docker ps : these 5 should be running 
 3. Run application
 Step 1 — Start Cassandra
    docker start reelify-cassandra

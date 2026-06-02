@@ -60,9 +60,9 @@ public class Controller {
     }
 
     @GetMapping("/stream/{videoId}/playlist")
-    public ResponseEntity<String> playCardVideos(@PathVariable String videoId){
+    public ResponseEntity<byte[]> playCardVideos(@PathVariable String videoId){
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/vnd.apple.mpegurl"))
-                        .body(videoService.getMinioSegments(videoId));
+                        .body(videoService.getMasterPlaylist(videoId));
     }
 
     @GetMapping("/stream/{videoId}/{segmentName}")

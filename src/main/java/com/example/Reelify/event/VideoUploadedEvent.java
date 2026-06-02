@@ -1,4 +1,4 @@
-package com.example.Reelify;
+package com.example.Reelify.event;
 
 public class VideoUploadedEvent {
 

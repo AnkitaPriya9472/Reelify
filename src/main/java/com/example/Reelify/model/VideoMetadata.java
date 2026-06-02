@@ -31,6 +31,26 @@ public class VideoMetadata {
         return rawKey;
     }
 
+    public void setVideoId(UUID videoId) {
+        this.videoId = videoId;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setRawKey(String rawKey) {
+        this.rawKey = rawKey;
+    }
+
+    public void setMasterPlaylistKey(String masterPlaylistKey) {
+        this.masterPlaylistKey = masterPlaylistKey;
+    }
+
     public String getMasterPlaylistKey() {
         return masterPlaylistKey;
     }
