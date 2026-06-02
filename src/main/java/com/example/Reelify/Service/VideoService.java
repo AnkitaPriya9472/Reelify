@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +45,10 @@ public class VideoService {
     private S3Presigner s3Presigner;
 
     @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Value("${minio.bucket}")
     private String bucket;
@@ -95,8 +99,14 @@ public class VideoService {
                 metadata.getRawKey()
         );
 
-        kafkaTemplate.send("video.uploaded", videoId, event);
-        log.info("Published video.uploaded event for videoId: {}", videoId);
+        try{
+            String json = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send("video.uploaded", videoId, json);
+            log.info("Published video.uploaded event for videoId: {}", videoId);
+        }
+        catch(Exception e) {
+           throw new RuntimeException("Failed to publish Kafka event", e);
+        }
     }
 
     // ── EXISTING methods below (unchanged) ────────────────────────────────

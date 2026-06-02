@@ -31,3 +31,6 @@ Used by	                VideoService, SegmentUploadService	                     
 
 **Step 5 — application.properties in main Reelify app**
 
+cd /kafka
+docker compose up -d
+![img_3.png](img_3.png)
